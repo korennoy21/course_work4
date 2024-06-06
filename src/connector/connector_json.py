@@ -7,10 +7,13 @@ from src.dto import Vacancy, Salary
 
 class ConnectorJson(BaseConnector):
     def __init__(self, file_path: Path):
+        """Инициализация"""
         self.file_path = file_path
         self.encoding = 'utf-8'
 
     def get_vacancies(self) -> list[Vacancy]:
+        """Получение вакансий из файла,возвращает список экземпляров класса Vacancy,
+        если вакансий нет,вернет пустой список"""
         if not self.file_path.exists():
             return []
 
@@ -23,24 +26,28 @@ class ConnectorJson(BaseConnector):
         return vacancies
 
     def add_vacancy(self, vacancy: Vacancy) -> None:
+        """Добавляет вакансию в файл"""
         vacancies = self.get_vacancies()
         if vacancy not in vacancies:
             vacancies.append(vacancy)
             self._save(*vacancies)
 
     def del_vacancy(self, vacancy: Vacancy) -> None:
+        """Удаляет вакансию из файла"""
         vacancies = self.get_vacancies()
         if vacancy in vacancies:
             vacancies.remove(vacancy)
             self._save(*vacancies)
 
     def _save(self, *vacancies: Vacancy) -> None:
+        """Метод для сохранения файла"""
         data = [self._parse_vacancy_to_dict(v) for v in vacancies]
         with self.file_path.open('w', encoding=self.encoding) as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     @staticmethod
     def _parse_vacancy_to_dict(vacancy: Vacancy) -> dict:
+        """Превращение экземпляра класса Vacancy в словарь"""
         return {
             'name': vacancy.name,
             'url': vacancy.url,
@@ -55,6 +62,7 @@ class ConnectorJson(BaseConnector):
 
     @staticmethod
     def _parse_dict_to_vacancy(data: dict) -> Vacancy:
+        """Превращение словаря в экземпляр класса Vacancy"""
         return Vacancy(
             name=data['name'],
             url=data['url'],
